@@ -55,11 +55,14 @@ def change_ingame(id: int) -> None:
         with db:
             sql.execute(f"UPDATE users SET ingame = 0 WHERE id = {id}")
     else:
+        sql.execute(f"SELECT * from users_stats WHERE id = {id}")
+        user = sql.fetchone()
         with db:
+            sql.execute(f"UPDATE users_stats SET rand_num = {randint(0, 100)}")
+            sql.execute(f"UPDATE users_stats SET games_count = {user[2]+1}")
             sql.execute(f"UPDATE users SET ingame = 1 WHERE id = {id}")
 
 
-    
 
 def check_ingame(id: int) -> bool:
     sql.execute(f"SELECT * FROM users WHERE id = {id}")
@@ -71,16 +74,51 @@ def check_ingame(id: int) -> bool:
     return False
 
 
+def game(message: types.Message, n):
+    attempts = sql.execute(f"SELECT attempts FROM users_stats WHERE id = {message.from_id}").fetchone()[0]
+    games_win = sql.execute(f"SELECT games_win FROM users_stats WHERE id = {message.from_id}").fetchone()[0]
+    rand_num = sql.execute(f"SELECT rand_num FROM users_stats WHERE id = {message.from_id}").fetchone()[0]
+    
+    if attempts > 0:
+        attempts -= 1
+        if n == rand_num:
+            games_win += 1
+            sql.execute(f"UPDATE users_stats SET attempts = {7}")
+            sql.execute(f"UPDATE users_stats SET games_win = {games_win}")
+            change_ingame(message.from_id)
+            return "win"
+        else:
+            sql.execute(f"UPDATE users_stats SET attempts = {attempts}")
+            if rand_num > n:
+                return [attempts, True]
+            else:
+                return [attempts, False]
+    else:
+        return "defeat"
+
+        
+    """if rand_num == n:
+        sql.execute(f"UPDATE users_stats SET games_win = {games_win+1}")
+        sql.execute(f"UPDATE users_stats SET attempts = {7}")
+        return True
+    else:
+        sql.execute(f"UPDATE users_stats SET attempts = {attempts-1}")
+        if attempts-1 <= 0:
+            sql.execute(f"UPDATE users_stats SET attempts = {7}")
+            return False
+        else:
+            return True"""
+    
+
 def tests():
     id = 2120080409
 
-    sql.execute(f"SELECT * FROM users WHERE id = {id}")
-
+    sql.execute(f"SELECT username FROM users WHERE id = {id}")
     users = sql.fetchone()
-    print(users)
+    print(users[0])
 
-    for user in users:
-        print(user)
+    attempts = sql.execute(f"SELECT * FROM users_stats WHERE id = {id}").fetchone()[0]
+
 
 
 if __name__ == "__main__":

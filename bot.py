@@ -2,7 +2,7 @@ from os import getenv
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, executor, types
 from db_help import check_user_in_table, append_users, check_ingame
-from db_help import change_ingame
+from db_help import change_ingame, game
 
 load_dotenv()
 BOT_TOKEN: str = str(getenv("BOT_TOKEN"))
@@ -27,10 +27,25 @@ async def process_start_command(message: types.Message) -> None:
 async def process_echo_message(message: types.Message) -> None:
     # This func will send you your text message
     id = message.from_id
-    
+    print(message.text)
     if check_ingame(id):
-        await message.answer("you are in game.")
-    await message.answer(message.text)
+        try:
+            n = int(message.text)
+            res = game(message, n)
+            if res == "win":
+                await message.answer("you win!")
+            elif res == "defeat":
+                await message.answer("defeat")
+            else:
+                if res[1]:
+                    await message.answer(f"not right, bigger \nattempts: {res[0]}")
+                else:
+                    await message.answer(f"not right, smaller \nattempts: {res[0]}")
+
+        except ValueError:
+            await message.answer("it's not right data type. please, write num")
+    else:
+        await message.answer(message.text)
 
 
 async def process_start_game(message: types.Message) -> None:

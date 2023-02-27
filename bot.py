@@ -27,7 +27,6 @@ async def process_start_command(message: types.Message) -> None:
 async def process_echo_message(message: types.Message) -> None:
     # This func will send you your text message
     id = message.from_id
-    print(message.text)
     if check_ingame(id):
         try:
             n = int(message.text)
@@ -72,6 +71,6 @@ if __name__ == "__main__":
     dp.register_message_handler(process_start_command, commands=["start"])
     dp.register_message_handler(process_start_game, commands=["start_game"])
     dp.register_message_handler(process_cancel_game, commands=["cancel"])
-    dp.register_message_handler(process_send_cats, commands=["cats"])
+    dp.register_message_handler(process_send_cats, commands=["meow"])
     dp.register_message_handler(process_echo_message, content_types=["text"])
     executor.start_polling(dp, skip_updates=True)

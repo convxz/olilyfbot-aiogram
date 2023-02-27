@@ -1,9 +1,9 @@
-from os import getenv
+from os import getenv, remove
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, executor, types
 from db_help import check_user_in_table, append_users, check_ingame
 from db_help import change_ingame, game
-
+from cats import cat
 load_dotenv()
 BOT_TOKEN: str = str(getenv("BOT_TOKEN"))
 
@@ -64,9 +64,14 @@ async def process_cancel_game(message: types.Message) -> None:
         await message.answer("you are not in game.")
 
 
+async def process_send_cats(message: types.Message) -> None:
+    cat(BOT_TOKEN, message.from_id)
+
+    
 if __name__ == "__main__":
     dp.register_message_handler(process_start_command, commands=["start"])
     dp.register_message_handler(process_start_game, commands=["start_game"])
     dp.register_message_handler(process_cancel_game, commands=["cancel"])
+    dp.register_message_handler(process_send_cats, commands=["cats"])
     dp.register_message_handler(process_echo_message, content_types=["text"])
     executor.start_polling(dp, skip_updates=True)
